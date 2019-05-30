@@ -1,0 +1,22 @@
+
+programita para crear los .dat de las ciudades.
+
+compilarlo con g++ (o hacer make crear_ciudades)
+
+el comando es
+./crear_ciudades < ciudades_ejemplo.txt
+
+
+
+
+typedef struct iterador{
+    nodo_t* nodo_actual;
+    nodo_t* nodo_anterior;
+    lista_t* lista;
+} iterador_t;
+
+iterador_t* crear(lista_t* lista);
+int destruir(iterador_t iterador);
+int avanzar(iterador_t iterador);
+bool tiene_siguiente(iterador_t iterador);
+void* elemento_actual(iterador_t iterador);

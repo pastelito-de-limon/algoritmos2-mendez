@@ -1,0 +1,5 @@
+gcc *.c -Wall -Werror -Wconversion -std=c99 -o la_venganza_de_arya
+
+./la_venganza_de_arya
+
+valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./la_venganza_de_arya

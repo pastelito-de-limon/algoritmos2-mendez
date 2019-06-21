@@ -1,6 +1,13 @@
 #ifndef __VENGANZA_ARYA_H__
 #define __VENGANZA_ARYA_H__
 
+#include "lista.h"
+#include "pila.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdbool.h>
+
 #define MAX_NOMBRE 50
 #define	MAX_DESCRIPCION 600
 #define MAX_MENSAJE 300
@@ -53,19 +60,19 @@ int cargar_victimas(char archivo[MAX_NOMBRE], pila_t* victimas);
  * Recolectar el rostro, desapilar si es una víctima, actualizar el estado del jugador.
  * Devuelve 0 si se pudo actualizar correctamente o -1 en caso contrario.
  */
-int actualizar_juego(jugador_t* jugador, persona_t* persona);
+//int actualizar_juego(jugador_t* jugador, persona_t* persona);
 
 /*
  * Pasa a la siguiente ciudad.
  * Devuelve 0 si se pudo avanzar o -1 en caso contrario.
  */
-int avanzar_mapa(iterador_t* it_ciudades);
+//int avanzar_mapa(iterador_t* it_ciudades);
 
 /*
  * Imprime por pantalla la ciudad actual y aquellas que no fueron visitadas.
  * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
  */
-void mostrar_mapa(iterador_t* it_ciudades);
+int mostrar_mapa(iterador_t* it_ciudades);
 
 /*
  * Imprime por pantalla los rostros colectados.
@@ -80,7 +87,7 @@ int mostrar_rostros_recolectados(iterador_t* it_rostros);
 int mostrar_proxima_victima(pila_t* victimas);
 
 /**/
-int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades);
+//int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades);
 
 /**/
 int usuario_acepta(char entrada);
@@ -95,7 +102,7 @@ void modificar_vida(jugador_t* jugador, int cantidad);
 lista_t* dar_lista_rostros(jugador_t* jugador);
 
 /**/
-pila_t* dar_pila_victimas(jugador_t jugador);
+pila_t* dar_pila_victimas(jugador_t* jugador);
 
 /**/
 bool tengo_llave(jugador_t* jugador);

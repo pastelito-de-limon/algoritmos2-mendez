@@ -77,4 +77,6 @@ bool esta_al_final(const hash_iter_t* iterador);
  */
 int hash_iterador_destruir(hash_iter_t* iterador);
 
+void pruebas_micaela();
+
 #endif /* __HASH_H__ */

@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #define CANT_OPCIONES 5
+#define TAM_ENTRADA_USUARIO 3
 
 /*
 Intro: explicacion juego, explicacion menú, prompt comenzar, ...
@@ -19,22 +20,19 @@ Menú:
 ...
 */
 
-void destruir_pila_y_elementos(pila_t* pila) {
-	while (!pila_esta_vacia(pila)) {
-		free(pila_desapilar(pila));
+void destruir_pila_y_elementos(pila_t* victimas) {
+	while (!pila_esta_vacia(victimas)) {
+		free(pila_desapilar(victimas));
 	}
 	
 	pila_destruir(victimas);
 }
 
-void destruir_estructuras(jugador_t* jugador, pila_t* victimas, iterador_t* it_rostros, lista_t* ciudades, iterador_t* it_ciudades) {
-	if (it_rostros) {
-		lista_destruir(rostros, (void)free(void*));
-		lista_iter_destruir(it_rostros);
-	}
-
-	if (ciudades) lista_destruir(ciudades, (void)free(void*));
+void destruir_estructuras(jugador_t* jugador, pila_t* victimas, lista_t* rostros, iterador_t* it_rostros, lista_t* ciudades, iterador_t* it_ciudades) {
+	if (it_rostros) lista_iter_destruir(it_rostros);
+	if (rostros) lista_destruir(rostros, free);
 	if (it_ciudades) lista_iter_destruir(it_ciudades);
+	if (ciudades) lista_destruir(ciudades, free);
 	if (victimas) destruir_pila_y_elementos(victimas);
 	if (jugador) free(jugador);
 }
@@ -50,6 +48,7 @@ Gano si:
 */
 
 /* GANAR/PERDER: 1, SEGUIR: 0 */
+/*
 int chequear_fin_juego(pila_t* victimas, jugador_t* jugador, iterador_t* it_ciudades, ciudad_t* ultima_ciudad) {
 	if (pila_esta_vacia(victimas)) { //Si gano, con el print mensaje ganar 
 		printf("Has aniquilado a tus enemigos finalmente\n y han quedado sus almas en lamento...\n
@@ -66,85 +65,90 @@ int chequear_fin_juego(pila_t* victimas, jugador_t* jugador, iterador_t* it_ciud
 
 	return 0;
 }
-
+*/
 /* CORRECTO: 0, INCORRECTO: -1, BASURA: 1 */
-int usuario_menú(char entrada, jugador_t* jugador, pila_t* victimas, iterador_t* it_ciudades, iterador_t* it_rostros) {
-	if (entrada == 'I' || entrada == 'i') return dar_datos_persona(jugador, it_ciudades);
-	if (entrada == 'M' || entrada == 'm') return mostrar_mapa(iterador_t* it_ciudades);
-	if (entrada == 'A' || entrada == 'a') return avanzar_mapa(iterador_t* it_ciudades);
+int usuario_menu(char entrada, jugador_t* jugador, pila_t* victimas, iterador_t* it_ciudades, iterador_t* it_rostros) {
+	if (entrada == 'I' || entrada == 'i') printf("Pusiste una i\n");//return dar_datos_persona(jugador, it_ciudades);
+	if (entrada == 'M' || entrada == 'm') return mostrar_mapa(it_ciudades);
+	if (entrada == 'A' || entrada == 'a') printf("Pusiste una a\n");//return avanzar_mapa(iterador_t* it_ciudades);
 	else if (entrada == 'P' || entrada == 'p') return mostrar_proxima_victima(victimas);
-	else if (entrada == 'C' || entrada == 'c') return mostrar_rostros_recolectados(iterador_t* it_rostros);
+	else if (entrada == 'C' || entrada == 'c') return mostrar_rostros_recolectados(it_rostros);
 	return 1;
 }
 
 /* SEGUIR: 0, GANAR/PERDER = 1, ERROR: -1 */
 int jugar(jugador_t* jugador, pila_t* victimas, iterador_t* it_ciudades, iterador_t* it_rostros, ciudad_t* ultima_ciudad) {
-	char opcion[2];
+	char opcion[TAM_ENTRADA_USUARIO];
 
-	while (true) { //FALTAN CONDICIONES DE CORTE
+	while (true) { //FALTAN CONDICIONES DE CORTE?
 		printf("[Menu]\n");
-		fgets(opcion, 2, stdin);
+		fgets(opcion, TAM_ENTRADA_USUARIO, stdin);
 		int elegido = usuario_menu(opcion[0], jugador, victimas, it_ciudades, it_rostros);
 		
 		if (elegido > 0) {
 			printf("Escribí bien\n");
-			modificar_vida(jugador, DECREMENTO_VIDA);
+			modificar_vida(jugador, DESCUENTO_VIDA);
+			continue;
 		} else if (elegido < 0) {
-			perror("Mensaje de error");
+			perror("Prror 5");
 			return -1;
 		}
 
 		//A partir de ahora es cuando elegido == 0
-		//Condiciones de corte de ganar/perder y seguir
-		if (chequear_fin_juego(victimas, jugador, it_ciudades, ultima_ciudad) == 0) return 0;
+
+		//Sacar barritas de comentario a lo siguiente:
+		//if (chequear_fin_juego(victimas, jugador, it_ciudades, ultima_ciudad) == 0) return 0;
 		return 1;
 	}
 }
 
-int main(char** argv, int argc) {
-	printf("Intro"); 
+//DESTRUIR jugador_t* jugador, pila_t* victimas, lista_t* rostros, iterador_t* it_rostros, lista_t* ciudades, iterador_t* it_ciudades
+//JUGAR jugador_t* jugador, pila_t* victimas, iterador_t* it_ciudades, iterador_t* it_rostros, ciudad_t* ultima_ciudad
+int main(int argc, char** argv) {
+	printf("Intro\n"); 
 	jugador_t* jugador = nuevo_jugador();
 	
 	if (!jugador) {
-		perror("Mensaje de error");
+		perror("Prror 1");
 		return -1;
 	}
 
 	pila_t* victimas = dar_pila_victimas(jugador);
-	iterador_t* it_rostros = lista_iter_crear(dar_lista_rostros(jugador));
+	lista_t* rostros = dar_lista_rostros(jugador);
+	iterador_t* it_rostros = lista_iter_crear(rostros);
 
 	if (!it_rostros) {
-		destruir_estructuras(jugador, victimas, it_rostros, NULL, NULL);
-		perror("Mensaje de error");
+		destruir_estructuras(jugador, victimas, rostros, NULL, NULL, NULL);
+		perror("Prror 2");
 		return -1;
 	}
 
 	lista_t* ciudades = lista_crear();
 
 	if (!ciudades) {
-		destruir_estructuras(jugador, victimas, it_rostros, ciudades, NULL);
-		perror("Mensaje de error");
+		destruir_estructuras(jugador, victimas, rostros, it_rostros, NULL, NULL);
+		perror("Prror 3");
 		return -1;
 	}
 
 	iterador_t* it_ciudades = NULL;
 
 	if (cargar_ciudades("ciudades.dat", ciudades) != 0 || !(it_ciudades = lista_iter_crear(ciudades))) {
-		destruir_estructuras(jugador, victimas, it_rostros, ciudades, it_ciudades);
-		perror("Mensaje de error");
+		destruir_estructuras(jugador, victimas, rostros, it_rostros, ciudades, it_ciudades);
+		perror("Prror 4");
 		return -1;
 	}
 
 	ciudad_t* ultima_ciudad = lista_ver_ultimo(ciudades);
 
-	printf("Estamos en ciudad X etc...\n")
+	printf("Estamos en ciudad X etc...\n");
 	int sigo_jugando = 0;
 
 	while (sigo_jugando == 0) {
-		sigo_jugando = jugar(jugador, victimas, it_rostros, it_ciudades, ultima_ciudad);
+		sigo_jugando = jugar(jugador, victimas, it_ciudades, it_rostros, ultima_ciudad);
 	}
 
-	destruir_estructuras(jugador, victimas, it_rostros, ciudades, it_ciudades);
+	destruir_estructuras(jugador, victimas, rostros, it_rostros, ciudades, it_ciudades);
 	if (sigo_jugando == -1) return -1;
 	return 0;
 }

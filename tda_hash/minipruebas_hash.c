@@ -59,17 +59,24 @@ int main(){
   
   hash_iter_t* iter = crear_iterador(garage);
   int listados = 0;
-  while(avanzar_iterador(iter)){
+  while(!esta_al_final(iter)){
     listados++;
     const char* clave = elemento_actual(iter);
     printf("Patente: %s -- Vehiculo: %s\n", clave, (char*)obtener_elemento(garage, clave));
+    avanzar_iterador(iter);
   }
 
   printf("Cantidad de autos guardados: %zu. Cantidad de autos listados: %i -- %s\n", cantidad(garage), listados, (cantidad(garage)==listados)?"OK":"ERROR");
   
   hash_iterador_destruir(iter);
   destruir_hash(garage);
-  
+
+  printf("\n\n\n");
+  pruebas_micaela();
   return 0;
 }
+
+
+
+
 

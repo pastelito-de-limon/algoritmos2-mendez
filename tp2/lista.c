@@ -1,5 +1,9 @@
 #include "lista.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <stdbool.h>
+
 
 /* ******************************************************************
  *                DEFINICION DE LOS TIPOS DE DATOS
@@ -160,8 +164,8 @@ void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *e
  *                    PRIMITIVAS DEL ITERADOR EXTERNO
  * *****************************************************************/
 
-lista_iter_t *lista_iter_crear(lista_t *lista) {
-	lista_iter_t* iter = malloc(sizeof(lista_iter_t));
+iterador_t *lista_iter_crear(lista_t *lista) {
+	iterador_t* iter = malloc(sizeof(iterador_t));
 
 	if (!iter) {
 		return NULL;
@@ -174,11 +178,11 @@ lista_iter_t *lista_iter_crear(lista_t *lista) {
 	return iter;
 }
 
-bool lista_iter_al_final(const lista_iter_t *iter) {
+bool lista_iter_al_final(const iterador_t *iter) {
 	return !iter->actual;
 }
 
-bool lista_iter_avanzar(lista_iter_t *iter) {
+bool lista_iter_avanzar(iterador_t *iter) {
 	if (lista_iter_al_final(iter)) {
 		return false;
 	}
@@ -188,7 +192,7 @@ bool lista_iter_avanzar(lista_iter_t *iter) {
 	return true;
 }
 
-void *lista_iter_ver_actual(const lista_iter_t *iter) {
+void *lista_iter_ver_actual(const iterador_t *iter) {
 	if (!iter->actual) {
 		return NULL;
 	}
@@ -196,11 +200,11 @@ void *lista_iter_ver_actual(const lista_iter_t *iter) {
 	return iter->actual->dato;
 }
 
-void lista_iter_destruir(lista_iter_t *iter) {
+void lista_iter_destruir(iterador_t *iter) {
 	free(iter);
 }
 
-bool lista_iter_insertar(lista_iter_t *iter, void *dato) {
+bool lista_iter_insertar(iterador_t *iter, void *dato) {
 	nodo_t* nodo = crear_nodo(dato);
 	
 	if (!nodo) {
@@ -223,7 +227,7 @@ bool lista_iter_insertar(lista_iter_t *iter, void *dato) {
 	return true;
 }
 
-void *lista_iter_borrar(lista_iter_t *iter) {
+void *lista_iter_borrar(iterador_t *iter) {
 	if (!iter->actual) {
 		return NULL;
 	}

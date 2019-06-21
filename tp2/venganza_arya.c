@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "venganza_arya.h"
 #include "lista.h"
 #include "pila.h"
@@ -5,6 +6,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 
 /*
  * Crea un jugador y deja la lista de rostros preparada para ser utilizada.
@@ -67,7 +69,7 @@ int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 		}	
 	}
 
-	fclose(ciudades);
+	fclose(archivo_ciudades);
 	return 0;
 }
 
@@ -78,45 +80,48 @@ int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 int cargar_victimas(char archivo[MAX_NOMBRE], pila_t* victimas) {
 	FILE* archivo_victimas = fopen(archivo, "r");
 	if (!archivo_victimas) return -1;
-	char victima[MAX_NOMBRE];
-	size_t tamanio = sizeof(char) * (MAX_NOMBRE - 1);
+	char* linea = NULL;
+	ssize_t leido;
+	size_t tam;
+	char* victima;
 
-	while(!feof(archivo_victimas)){
-		victima = malloc(sizeof(char) * MAX_NOMBRE);
+	while((leido = getline(&linea, &tam, archivo_victimas)) != -1){
 
+		victima = malloc(sizeof(char) * (size_t)leido);
+		
 		if (!victima) {
 			fclose(archivo_victimas);
 			return -1;
 		}
 
-		size_t largo = fread(victima, tamanio, 1, archivo_victimas);
+		strcpy(victima, linea);
+		victima[leido - 1] = '\0';
 
 		if (!pila_apilar(victimas, victima)) {
-			free(ciudad);
+			free(victima);
 			fclose(archivo_victimas);
 			return -1;
 		}
-
-		victima[largo] = '/0';
 	}
 
-	fclose(victimas);
+	free(linea);
+	fclose(archivo_victimas);
 	return 0;
 }
 
-void matar_victima(jugador_t* jugador, persona_t persona) {
+/*void matar_victima(jugador_t* jugador, persona_t persona) {
 	lista_insertar_ultimo(jugador->rostros, persona);
 	pila_desapilar(jugador->victimas);
 }
-
+*/
 /*
  * Luego de asesinar una persona, se deben actualizar los registros según corresponda.
  * Recolectar el rostro, desapilar si es una víctima, actualizar el estado del jugador.
  * Devuelve 0 si se pudo actualizar correctamente o -1 en caso contrario.
  */
-int actualizar_juego(jugador_t* jugador, persona_t persona) {
+/*int actualizar_juego(jugador_t* jugador, persona_t persona) {
 	if (persona->en_lista == 1) {
-		if (pila_ver_tope(jugador->victimas) != persona) {
+		if (pila_ver_tope(jugador->victimas) != persona) { //LA PILA DE VICITMAS TIENE CHAR* ADENTROOOOO
 			jugador->vida = 0;
 			return -1; //hay una victima anterior que no fue eliminada
 		}
@@ -135,18 +140,18 @@ int actualizar_juego(jugador_t* jugador, persona_t persona) {
 
 	return 0;
 }
-
+*/
 /*
  * Pasa a la siguiente ciudad.
  * Devuelve 0 si se pudo avanzar o -1 en caso contrario.
  */
-int avanzar_mapa(iterador_t* it_ciudades) {
+/*int avanzar_mapa(iterador_t* it_ciudades) {
 	if (!lista_iter_avanzar(it_ciudades)) return -1;
 	return 0;
 }
-
+*/
 /*BIEN: 0, ERROR: -1*/
-int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades) {
+/*int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades) {
 	persona_t* persona = it_ciudades->actual->posible_victima;
 	printf("%s\n", persona->descripcion);
 	char opcion[2];
@@ -156,7 +161,7 @@ int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades) {
 
 	while(aceptado > 0) {
 		printf("Escribí bien\n");
-		modificar_vida(jugador, DECREMENTO_VIDA);
+		modificar_vida(jugador, DESCUENTO_VIDA);
 		aceptado = usuario_acepta(opcion[0]);
 	}
 
@@ -171,21 +176,25 @@ int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades) {
 	//...o si no eliminar ciudad pero asegurar que quede la ciudad anterior apuntando a la siguiente (!)
 	return 0;
 }
-
+*/
 /*
  * Imprime por pantalla la ciudad actual y aquellas que no fueron visitadas.
  * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
  */
 int mostrar_mapa(iterador_t* it_ciudades) {
 	char* ciudad = (char*)lista_iter_ver_actual(it_ciudades);
-	printf("Ciudad actual: %s\n", ciudad);
+	printf("Ciudad actual: \n%s\n", ciudad);
 	if (lista_iter_al_final(it_ciudades)) return 0;
+	lista_iter_avanzar(it_ciudades);
 	printf("Mapa:\n");
 
-	while (lista_iter_avanzar(it_ciudades)) {
+	while (!lista_iter_al_final(it_ciudades)) {
 		ciudad = (char*)lista_iter_ver_actual(it_ciudades);
 		printf("%s\n", ciudad);
+		lista_iter_avanzar(it_ciudades);
 	}
+
+	//hay que eliminar el iter al final actual y rehacerlo
 
 	return 0;
 }
@@ -194,9 +203,10 @@ int mostrar_mapa(iterador_t* it_ciudades) {
  * Imprime por pantalla los rostros colectados.
  * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
  */
+
 int mostrar_rostros_recolectados(iterador_t* it_rostros) {
-	if (lista_esta_vacia(it_rostros->lista)) {
-		printf("Aun no tenes rostros\n");
+	if (lista_iter_al_final(it_rostros)) {
+		printf("Aún no tenés rostros\n");
 		return 0;
 	}
 
@@ -208,6 +218,8 @@ int mostrar_rostros_recolectados(iterador_t* it_rostros) {
 		lista_iter_avanzar(it_rostros);
 	}
 
+	//hay que eliminar el iter al final actual y rehacerlo
+
 	return 0;
 }
 
@@ -215,9 +227,10 @@ int mostrar_rostros_recolectados(iterador_t* it_rostros) {
  * Imprime por pantalla el nombre de la próxima víctima.
  * Devuelve 0 si pudo mostrarlo o -1 en caso contrario.
  */
+
 int mostrar_proxima_victima(pila_t* victimas) {
+	if (!pila_ver_tope(victimas)) return -1;
 	char* proxima_victima = (char*)pila_ver_tope(victimas);
-	if (!proxima_victima) return -1;
 	printf("La próxima vez que sangre sea derramada,\nTendrá %s una muerte desalmada.\n", proxima_victima);
 	return 0;
 }
@@ -234,8 +247,8 @@ lista_t* dar_lista_rostros(jugador_t* jugador) {
 	return jugador->rostros;
 }
 
-pila_t* dar_pila_victimas(jugador_t jugador) {
-	return jugador->victimas
+pila_t* dar_pila_victimas(jugador_t* jugador) {
+	return jugador->victimas;
 }
 
 /* ACEPTA: 0, RECHAZA: -1, BASURA: 1 */

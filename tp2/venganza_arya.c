@@ -7,11 +7,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#define TAM_ENTRADA_USUARIO 3
+#define DESCUENTO_VIDA -20
+#define AUMENTO_VIDA 5
 
-/*
- * Crea un jugador y deja la lista de rostros preparada para ser utilizada.
- * Devuelve NULL si no pudo crear algo de lo necesario.
- */
 jugador_t* nuevo_jugador() {
 	jugador_t* jugador = malloc(sizeof(jugador_t));
 	if (!jugador) return NULL;
@@ -42,10 +41,6 @@ jugador_t* nuevo_jugador() {
 	return jugador;
 }
 
-/*
- * Carga las ciudades del archivo a la lista de ciudades a utilizar.
- * Devuelve 0 si la lista se cargo correctamente, -1 en caso contrario.
- */
 int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 	FILE* archivo_ciudades = fopen(archivo, "r");
 	if (!archivo_ciudades) return -1;
@@ -73,10 +68,6 @@ int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 	return 0;
 }
 
-/*
- * Carga las victimas del archivo a la pila de víctimas a utilizar.
- * Devuelve 0 si la lista se cargo correctamente, -1 en caso contrario.
- */
 int cargar_victimas(char archivo[MAX_NOMBRE], pila_t* victimas) {
 	FILE* archivo_victimas = fopen(archivo, "r");
 	if (!archivo_victimas) return -1;
@@ -109,82 +100,10 @@ int cargar_victimas(char archivo[MAX_NOMBRE], pila_t* victimas) {
 	return 0;
 }
 
-/*void matar_victima(jugador_t* jugador, persona_t persona) {
-	lista_insertar_ultimo(jugador->rostros, persona);
-	pila_desapilar(jugador->victimas);
-}
-*/
-/*
- * Luego de asesinar una persona, se deben actualizar los registros según corresponda.
- * Recolectar el rostro, desapilar si es una víctima, actualizar el estado del jugador.
- * Devuelve 0 si se pudo actualizar correctamente o -1 en caso contrario.
- */
-/*int actualizar_juego(jugador_t* jugador, persona_t persona) {
-	if (persona->en_lista == 1) {
-		if (pila_ver_tope(jugador->victimas) != persona) { //LA PILA DE VICITMAS TIENE CHAR* ADENTROOOOO
-			jugador->vida = 0;
-			return -1; //hay una victima anterior que no fue eliminada
-		}
-		
-		matar_victima(jugador, persona);
-		return 0;
-	}
-
-	if (persona->culpable == 1) {
-		if (persona->beneficio == 1) modificar_vida(jugador, AUMENTO_VIDA);
-		else if (persona->beneficio == 2) matar_victima(jugador, pila_ver_tope(jugador->victimas));
-		else jugador->posee_llave = true;
-	} else {
-		modificar_vida(jugador, persona->danio);
-	}
-
-	return 0;
-}
-*/
-/*
- * Pasa a la siguiente ciudad.
- * Devuelve 0 si se pudo avanzar o -1 en caso contrario.
- */
-/*int avanzar_mapa(iterador_t* it_ciudades) {
-	if (!lista_iter_avanzar(it_ciudades)) return -1;
-	return 0;
-}
-*/
-/*BIEN: 0, ERROR: -1*/
-/*int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades) {
-	persona_t* persona = it_ciudades->actual->posible_victima;
-	printf("%s\n", persona->descripcion);
-	char opcion[2];
-	printf("Sale ese asesinato loquillo? (S/N): \n");
-	fgets(opcion, 2, stdin);
-	int aceptado = usuario_acepta(opcion[0]);
-
-	while(aceptado > 0) {
-		printf("Escribí bien\n");
-		modificar_vida(jugador, DESCUENTO_VIDA);
-		aceptado = usuario_acepta(opcion[0]);
-	}
-
-	if (aceptado < 0) {
-		printf("%s\n", persona->msj_perdon);
-		return 0;
-	}
-
-	printf("%s\n", persona->msj_muerte);
-	if (actualizar_juego(jugador, persona) != 0) return -1;
-	avanzar_mapa(it_ciudades); //eliminar persona de ciudad y luego chequear NULLs... (!)
-	//...o si no eliminar ciudad pero asegurar que quede la ciudad anterior apuntando a la siguiente (!)
-	return 0;
-}
-*/
-/*
- * Imprime por pantalla la ciudad actual y aquellas que no fueron visitadas.
- * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
- */
-int mostrar_mapa(iterador_t* it_ciudades) {
+void mostrar_mapa(iterador_t* it_ciudades) {
 	char* ciudad = (char*)lista_iter_ver_actual(it_ciudades);
 	printf("Ciudad actual: \n%s\n", ciudad);
-	if (lista_iter_al_final(it_ciudades)) return 0;
+	if (lista_iter_al_final(it_ciudades)) return;
 	lista_iter_avanzar(it_ciudades);
 	printf("Mapa:\n");
 
@@ -194,15 +113,8 @@ int mostrar_mapa(iterador_t* it_ciudades) {
 		lista_iter_avanzar(it_ciudades);
 	}
 
-	//hay que eliminar el iter al final actual y rehacerlo
-
-	return 0;
+	lista_iter_destruir(it_ciudades);
 }
-
-/*
- * Imprime por pantalla los rostros colectados.
- * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
- */
 
 int mostrar_rostros_recolectados(iterador_t* it_rostros) {
 	if (lista_iter_al_final(it_rostros)) {
@@ -218,15 +130,9 @@ int mostrar_rostros_recolectados(iterador_t* it_rostros) {
 		lista_iter_avanzar(it_rostros);
 	}
 
-	//hay que eliminar el iter al final actual y rehacerlo
-
+	lista_iter_destruir(it_rostros);
 	return 0;
 }
-
-/*
- * Imprime por pantalla el nombre de la próxima víctima.
- * Devuelve 0 si pudo mostrarlo o -1 en caso contrario.
- */
 
 int mostrar_proxima_victima(pila_t* victimas) {
 	if (!pila_ver_tope(victimas)) return -1;
@@ -260,4 +166,87 @@ int usuario_acepta(char entrada) {
 
 bool tengo_llave(jugador_t* jugador) {
 	return jugador->posee_llave;
+}
+
+int avanzar_mapa(iterador_t* it_ciudades) {
+	ciudad_t* ciudad_previa = lista_iter_ver_actual(it_ciudades);
+	lista_iter_avanzar(it_ciudades);
+
+	while (!lista_iter_al_final(it_ciudades)) {
+		if (ciudad_t) break;
+		
+		lista_iter_avanzar(it_ciudades);
+	}
+
+	if (lista_iter_al_final(it_ciudades)) return -1;
+	ciudad_t* ciudad_actual = lista_iter_ver_actual(it_ciudades);
+	printf("Haz llegado de %s a tu pŕoximo destino.\n¿Habrá de ser %s tu triufar o tu castigo?\n", ciudad_previa->nombre, ciudad_actual->nombre);	
+	return 0;
+}
+
+void matar_victima(jugador_t* jugador, char* rostro) {
+	free(pila_desapilar(jugador->victimas));
+	lista_insertar_ultimo(jugador->rostros, rostro);
+
+}
+
+int actualizar_juego(jugador_t* jugador, persona_t* persona) {
+	if (persona->en_lista == 1) {
+		if (strcmp((char*)pila_ver_tope(jugador->victimas), persona->nombre) != 0) { 
+			jugador->vida = 0;
+			return -1;
+		}
+		
+		char* rostro = malloc(sizeof(char) * strlen(persona->nombre));
+		if (!rostro) return -1;
+		strcpy(rostro, persona->nombre);
+		matar_victima(jugador, rostro);
+		printf("Un nuevo rufián destruído,\nOtra escoria finalmente derrotada.\nY al haber su maldad detenido\nPuedes seguir tu ruta planeada...\n");
+		return 0;
+	}
+
+	if (persona->culpable == 1) {
+		printf("Al ir más allá del esfuerzo necesario,\nLibrando al mundo de un mal no sabido,\nLos dioses han de tenerte en su gloria\nDándote un premio bien merecido...\n");
+		if (persona->beneficio == 1) modificar_vida(jugador, AUMENTO_VIDA);
+		else if (persona->beneficio == 2) matar_victima(jugador, pila_ver_tope(jugador->victimas));
+		else jugador->posee_llave = true;
+	} else {
+		printf("¡Haz cubierto de sangre a un inocente!\nTendrán los dioses crueldad con tu suerte...\n");
+		modificar_vida(jugador, persona->danio);
+	}
+
+	return 0;
+}
+
+int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades, ciudad_t* ultima_ciudad) {
+	persona_t* persona = it_ciudades->actual->posible_victima;
+	
+	rintf("%s\n", persona->descripcion);
+	char opcion[TAM_ENTRADA_USUARIO];
+	printf("¿Haz de tomar en tus manos a esta persona desconocida\nY proclamar frente a los dioses el fin de su vida?\n(S/N): \n");
+	fgets(opcion, TAM_ENTRADA_USUARIO, stdin);
+	int aceptado = usuario_acepta(opcion[0]);
+
+	while(aceptado > 0) {
+		printf("La prisa transforma al sabio nuevamente\nEn el más bestial analfabeta.\nSigue errando de esta forma\n Y verás tu muerte prontamente.\n");
+		modificar_vida(jugador, DESCUENTO_VIDA);
+		printf("¿Haz de tomar en tus manos a esta persona desconocida\nY proclamar frente a los dioses el fin de su vida?\n(S/N): \n");
+		fgets(opcion, TAM_ENTRADA_USUARIO, stdin);
+		aceptado = usuario_acepta(opcion[0]);
+	}
+
+	if (aceptado < 0) {
+		printf("La misericordia es hoy tu virtud.\nTe saluda %s en gratitud:\n'%s'\n", persona->nombre, persona->msj_perdon);
+		return 0;
+	}
+
+	printf("%s susurra antes de perecer\nPalabras que atormentarán tu ser:\n'%s'\n",persona->nombre, persona->msj_muerte);
+	
+	/*Si la persona es culpable y su beneficio es matar a la próxima víctima, 
+	pero la próxima víctima es la última que hay entonces cambio el beneficio*/
+	bool caso_borde = (persona->culpable == 1) && (persona->beneficio = 2) && (strcmp(pila_ver_tope(jugador->victimas), ultima_ciudad->posible_victima->nombre) == 0);
+	if (caso_borde) persona->beneficio = 1;
+	if (actualizar_juego(jugador, persona) != 0) return -1;
+	avanzar_mapa(it_ciudades);
+	return 0;
 }

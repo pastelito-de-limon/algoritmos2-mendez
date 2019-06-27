@@ -70,8 +70,8 @@ int chequear_fin_juego(pila_t* victimas, jugador_t* jugador, iterador_t* it_ciud
 }
 */
 /* CORRECTO: 0, INCORRECTO: -1, BASURA: 1 */
-int usuario_menu(char entrada, jugador_t* jugador, pila_t* victimas, iterador_t* it_ciudades, iterador_t* it_mapa, iterador_t* it_rostros, ciudad_t* ultima_ciudad) {
-	if (entrada == 'I' || entrada == 'i') return dar_datos_persona(jugador, it_ciudades, ultima_ciudad);
+int usuario_menu(char entrada, jugador_t* jugador, pila_t* victimas, lista_t* ciudades, iterador_t* it_ciudades, iterador_t* it_mapa, iterador_t* it_rostros, ciudad_t* ultima_ciudad) {
+	if (entrada == 'I' || entrada == 'i') return dar_datos_persona(jugador, ciudades, it_ciudades, ultima_ciudad);
 	
 	if (entrada == 'M' || entrada == 'm') {
 		mostrar_mapa(it_mapa);
@@ -89,12 +89,12 @@ int jugar(jugador_t* jugador, pila_t* victimas, lista_t* ciudades, iterador_t* i
 	char opcion[TAM_ENTRADA_USUARIO];
 	printf("[Menu]\n");
 	fgets(opcion, TAM_ENTRADA_USUARIO, stdin);
-	int elegido = usuario_menu(opcion[0], jugador, victimas, it_ciudades, it_mapa, it_rostros, ultima_ciudad);
+	int elegido = usuario_menu(opcion[0], jugador, victimas, ciudades, it_ciudades, it_mapa, it_rostros, ultima_ciudad);
 
 	while (elegido > 0) {
 		printf("[Menu]\n");
 		fgets(opcion, TAM_ENTRADA_USUARIO, stdin);
-		elegido = usuario_menu(opcion[0], jugador, victimas, it_ciudades, it_mapa, it_rostros, ultima_ciudad);
+		elegido = usuario_menu(opcion[0], jugador, victimas, ciudades, it_ciudades, it_mapa, it_rostros, ultima_ciudad);
 		printf("Escribí bien\n");
 		modificar_vida(jugador, DESCUENTO_VIDA);
 	}

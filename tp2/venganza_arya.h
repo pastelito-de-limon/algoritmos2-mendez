@@ -60,26 +60,25 @@ int cargar_victimas(char archivo[MAX_NOMBRE], pila_t* victimas);
  * Devuelve 0 si se pudo actualizar correctamente o -1 en caso contrario.
  */
 
-//La definición de función original tenía como argumento persona_t persona (sin asterisco)
-int actualizar_juego(jugador_t* jugador, persona_t* persona);
+int actualizar_juego(jugador_t* jugador, persona_t persona, lista_t* ciudades, iterador_t* it_rostros);
 
 /*
  * Pasa a la siguiente ciudad.
  * Devuelve 0 si se pudo avanzar o -1 en caso contrario.
  */
-int avanzar_mapa(iterador_t* it_ciudades);
+int avanzar_mapa(jugador_t* jugador, iterador_t* it_ciudades, ciudad_t* ultima_ciudad, int* ciudad_numero);
 
 /*
  * Imprime por pantalla la ciudad actual y aquellas que no fueron visitadas.
  * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
  */
-void mostrar_mapa(iterador_t* it_ciudades);
+void mostrar_mapa(lista_t* ciudades, iterador_t* it_ciudades, int* ciudad_numero);
 
 /*
  * Imprime por pantalla los rostros colectados.
  * Devuelve 0 si se pudo mostrar o -1 en caso contrario.
  */
-int mostrar_rostros_recolectados(iterador_t* it_rostros);
+int mostrar_rostros_recolectados(lista_t* rostros, iterador_t* it_rostros);
 
 /*
  * Imprime por pantalla el nombre de la próxima víctima.
@@ -88,7 +87,7 @@ int mostrar_rostros_recolectados(iterador_t* it_rostros);
 int mostrar_proxima_victima(pila_t* victimas);
 
 /**/
-int dar_datos_persona(jugador_t* jugador, iterador_t* it_ciudades, ciudad_t* ultima_ciudad);
+int dar_datos_persona(jugador_t* jugador, lista_t* ciudades, iterador_t* it_ciudades, iterador_t* it_rostros, ciudad_t* ultima_ciudad, int* ciudad_numero);
 
 /**/
 int usuario_acepta(char entrada);

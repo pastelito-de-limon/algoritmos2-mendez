@@ -178,25 +178,19 @@ iterador_t *lista_iter_crear(lista_t *lista) {
 	return iter;
 }
 
-bool lista_iter_al_final(const iterador_t *iter) {
+bool lista_iter_al_final(iterador_t *iter) {
 	return !iter->actual;
 }
 
 bool lista_iter_avanzar(iterador_t *iter) {
-	if (lista_iter_al_final(iter)) {
-		return false;
-	}
-
+	if (lista_iter_al_final(iter)) return false;
 	iter->anterior = iter->actual;
 	iter->actual = iter->actual->proximo;
 	return true;
 }
 
-void *lista_iter_ver_actual(const iterador_t *iter) {
-	if (!iter->actual) {
-		return NULL;
-	}
-
+void *lista_iter_ver_actual(iterador_t *iter) {
+	if (lista_iter_al_final(iter)) return NULL;
 	return iter->actual->dato;
 }
 
@@ -228,10 +222,7 @@ bool lista_iter_insertar(iterador_t *iter, void *dato) {
 }
 
 void *lista_iter_borrar(iterador_t *iter) {
-	if (!iter->actual) {
-		return NULL;
-	}
-
+	if (lista_iter_al_final(iter)) return NULL;
 	nodo_t* nodo = iter->actual->proximo;
 
 	if (!iter->anterior) {

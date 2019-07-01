@@ -93,12 +93,12 @@ bool lista_iter_avanzar(iterador_t *iter);
 /*Devuelve el dato de la lista al cual apunta actualmente.
 Pre: el iterador existe.
 Post: devuelve dicho dato, de no existir, devuelve NULL.*/
-void *lista_iter_ver_actual(const iterador_t *iter);
+void *lista_iter_ver_actual(iterador_t *iter);
 
 /*Informa si el iterador ha alcanzado el final de la lista y se encuentra apuntando a NULL.
 Pre: el iterador existe.
 Post: devuelve true de estar al final, false de lo contrario.*/
-bool lista_iter_al_final(const iterador_t *iter);
+bool lista_iter_al_final(iterador_t *iter);
 
 /*Destruye el iterador.
 Pre: el iterador existe.

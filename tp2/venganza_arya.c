@@ -55,9 +55,9 @@ int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 			return -1;
 		}
 
-		fread(ciudad, tamanio, 1, archivo_ciudades);
+		size_t leidos = fread(ciudad, tamanio, 1, archivo_ciudades);
 		
-		if ((strcmp(ciudad->nombre, "") == 0) || (strcmp(ciudad->nombre, " ") == 0)) {
+		if (leidos == 0) {
 			free(ciudad);
 			break;
 		}
@@ -66,7 +66,7 @@ int cargar_ciudades(char archivo[MAX_NOMBRE], lista_t* ciudades) {
 			free(ciudad);
 			fclose(archivo_ciudades);
 			return -1;
-		}	
+		}
 	}
 
 	fclose(archivo_ciudades);
@@ -122,8 +122,7 @@ void mostrar_mapa(lista_t* ciudades, iterador_t* it_mapa, int* ciudad_numero) {
 		lista_iter_avanzar(it_mapa);
 	}
 
-	lista_iter_destruir(it_mapa);
-	it_mapa = lista_iter_crear(ciudades);
+	lista_iter_resetear(it_mapa);
 	printf("\n");
 }
 
@@ -141,8 +140,7 @@ int mostrar_rostros_recolectados(lista_t* rostros, iterador_t* it_rostros) {
 		lista_iter_avanzar(it_rostros);
 	}
 
-	lista_iter_destruir(it_rostros);
-	it_rostros = lista_iter_crear(rostros);
+	lista_iter_resetear(it_rostros);
 	printf("\n");
 	return 0;
 }
@@ -224,13 +222,14 @@ int eliminar_ciudad(jugador_t* jugador, lista_t* ciudades, iterador_t* it_rostro
 	}
 	
 	persona_t persona = ((ciudad_t*)lista_iter_ver_actual(aux))->posible_victima;
-	char* rostro = malloc(sizeof(char) * strlen(persona.nombre));
+	char* rostro = malloc(sizeof(char) * strlen(persona.nombre) + 1);
 	if (!rostro) return -1;
 	strcpy(rostro, persona.nombre);
 	matar_victima(jugador, it_rostros, rostro);
 	ciudad_t* borrado = lista_iter_borrar(aux);
 	free(aux);
 	if (!borrado) return -1;
+	free(borrado);
 	return 0;
 }
 
@@ -241,7 +240,7 @@ int actualizar_juego(jugador_t* jugador, persona_t persona, lista_t* ciudades, i
 			return -1;
 		}
 		
-		char* rostro = malloc(sizeof(char) * strlen(persona.nombre));
+		char* rostro = malloc(sizeof(char) * strlen(persona.nombre) + 1);
 		if (!rostro) return -1;
 		strcpy(rostro, persona.nombre);
 		matar_victima(jugador, it_rostros, rostro);

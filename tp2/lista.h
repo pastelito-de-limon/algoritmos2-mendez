@@ -116,6 +116,9 @@ Pre: el iterador existe.
 Post: de lograr eliminarlo, lo devuelve. Si el iterador apuntaba al final, devuelve NULL.*/
 void *lista_iter_borrar(iterador_t *iter);
 
+/*Resetea el iter a la primer posicion de la lista*/
+void lista_iter_resetear(iterador_t* iter);
+
 /* *****************************************************************
  *                      PRUEBAS UNITARIAS
  * *****************************************************************/

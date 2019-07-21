@@ -165,6 +165,7 @@ void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *e
  * *****************************************************************/
 
 iterador_t *lista_iter_crear(lista_t *lista) {
+	if (!lista) return NULL;
 	iterador_t* iter = malloc(sizeof(iterador_t));
 
 	if (!iter) {
@@ -179,26 +180,29 @@ iterador_t *lista_iter_crear(lista_t *lista) {
 }
 
 bool lista_iter_al_final(iterador_t *iter) {
+	if (!iter) return false;
 	return !iter->actual;
 }
 
 bool lista_iter_avanzar(iterador_t *iter) {
-	if (lista_iter_al_final(iter)) return false;
+	if (!iter || lista_iter_al_final(iter)) return false;
 	iter->anterior = iter->actual;
 	iter->actual = iter->actual->proximo;
 	return true;
 }
 
 void *lista_iter_ver_actual(iterador_t *iter) {
-	if (lista_iter_al_final(iter)) return NULL;
+	if (!iter || lista_iter_al_final(iter)) return NULL;
 	return iter->actual->dato;
 }
 
 void lista_iter_destruir(iterador_t *iter) {
+	if (!iter) return;
 	free(iter);
 }
 
 bool lista_iter_insertar(iterador_t *iter, void *dato) {
+	if (!iter || !dato) return false;
 	nodo_t* nodo = crear_nodo(dato);
 	
 	if (!nodo) {
@@ -222,7 +226,7 @@ bool lista_iter_insertar(iterador_t *iter, void *dato) {
 }
 
 void *lista_iter_borrar(iterador_t *iter) {
-	if (lista_iter_al_final(iter)) return NULL;
+	if (!iter || lista_iter_al_final(iter)) return NULL;
 	nodo_t* nodo = iter->actual->proximo;
 
 	if (!iter->anterior) {
@@ -240,4 +244,9 @@ void *lista_iter_borrar(iterador_t *iter) {
 	iter->actual = nodo;
 	iter->lista->largo--;
 	return dato;
+}
+
+void lista_iter_resetear(iterador_t* iter) {
+	if (!iter) return;
+	iter->actual = iter->lista->primero;
 }
